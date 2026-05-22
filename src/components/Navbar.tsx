@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Compass, Menu, X } from 'lucide-react';
+import WalletConnectButton from './WalletConnectButton';
 
 const NAV_LINKS = [
   { to: '/apps',     label: 'dApps' },
@@ -85,24 +86,13 @@ const Navbar: React.FC = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
+            <WalletConnectButton />
             <Link
               to="/apps"
               className="font-mono text-[11px] uppercase tracking-wider px-4 py-2 rounded text-txt-primary transition-all duration-150"
               style={{
                 background: 'rgba(0,82,255,0.18)',
                 border: '1px solid rgba(0,82,255,0.35)',
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget;
-                el.style.background = 'rgba(0,82,255,0.3)';
-                el.style.borderColor = 'rgba(0,212,255,0.5)';
-                el.style.color = '#00d4ff';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget;
-                el.style.background = 'rgba(0,82,255,0.18)';
-                el.style.borderColor = 'rgba(0,82,255,0.35)';
-                el.style.color = '#e8edf5';
               }}
             >
               Enter Map
@@ -135,6 +125,9 @@ const Navbar: React.FC = () => {
             }}
           >
             <nav className="flex flex-col px-6 py-4 gap-1">
+              <div className="py-3 border-b border-base-blue/10">
+                <WalletConnectButton />
+              </div>
               <Link
                 to="/"
                 onClick={() => setMobileOpen(false)}
