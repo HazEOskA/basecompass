@@ -125,9 +125,6 @@ const Navbar: React.FC = () => {
             }}
           >
             <nav className="flex flex-col px-6 py-4 gap-1">
-              <div className="py-3 border-b border-base-blue/10">
-                <WalletConnectButton />
-              </div>
               <Link
                 to="/"
                 onClick={() => setMobileOpen(false)}
