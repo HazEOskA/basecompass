@@ -20,80 +20,165 @@ const BASE_PARAMS = {
   blockExplorerUrls: ['https://basescan.org'],
 };
 
+type ProviderDetail = {
+  info?: {
+    name?: string;
+    rdns?: string;
+    uuid?: string;
+    icon?: string;
+  };
+  provider?: any;
+};
+
 const shortAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
 
 const FixedWalletButton: React.FC = () => {
   const [address, setAddress] = useState('');
   const [chainId, setChainId] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Ready');
+  const [provider, setProvider] = useState<any>(null);
 
-  const refreshWallet = async () => {
-    if (!window.ethereum) return;
+  const findProvider = () => {
+    const eth = window.ethereum;
 
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      const currentChain = await window.ethereum.request({ method: 'eth_chainId' });
+    if (!eth) return null;
 
-      setAddress(accounts?.[0] || '');
-      setChainId(currentChain || '');
-    } catch {
-      setStatus('Wallet check failed');
+    if (eth.isCoinbaseWallet) return eth;
+
+    if (Array.isArray(eth.providers)) {
+      const coinbase = eth.providers.find((p: any) => p?.isCoinbaseWallet);
+      if (coinbase) return coinbase;
+
+      const metamask = eth.providers.find((p: any) => p?.isMetaMask);
+      if (metamask) return metamask;
+
+      return eth.providers[0];
     }
+
+    return eth;
   };
-
-  useEffect(() => {
-    refreshWallet();
-
-    if (!window.ethereum) return;
-
-    const onAccountsChanged = (accounts: string[]) => {
-      setAddress(accounts?.[0] || '');
-    };
-
-    const onChainChanged = (nextChainId: string) => {
-      setChainId(nextChainId);
-    };
-
-    window.ethereum.on?.('accountsChanged', onAccountsChanged);
-    window.ethereum.on?.('chainChanged', onChainChanged);
-
-    return () => {
-      window.ethereum?.removeListener?.('accountsChanged', onAccountsChanged);
-      window.ethereum?.removeListener?.('chainChanged', onChainChanged);
-    };
-  }, []);
 
   const openCoinbaseWallet = () => {
     const url = encodeURIComponent(window.location.href);
     window.location.href = `https://go.cb-w.com/dapp?cb_url=${url}`;
   };
 
+  const refreshWallet = async (manualProvider?: any) => {
+    const p = manualProvider || provider || findProvider();
+
+    if (!p) {
+      setStatus('No injected wallet');
+      return;
+    }
+
+    setProvider(p);
+
+    try {
+      const accounts = await p.request({ method: 'eth_accounts' });
+      const currentChain = await p.request({ method: 'eth_chainId' });
+
+      setAddress(accounts?.[0] || '');
+      setChainId(currentChain || '');
+
+      if (accounts?.[0]) {
+        setStatus(currentChain === BASE_CHAIN_ID ? 'Connected on Base' : 'Wallet connected');
+      } else {
+        setStatus('Wallet detected');
+      }
+    } catch {
+      setStatus('Wallet check failed');
+    }
+  };
+
+  useEffect(() => {
+    const p = findProvider();
+    if (p) {
+      setProvider(p);
+      refreshWallet(p);
+    } else {
+      setStatus('Open in wallet browser');
+    }
+
+    const onAnnounce = (event: any) => {
+      const detail = event.detail as ProviderDetail;
+      const announced = detail?.provider;
+      const name = detail?.info?.name || '';
+      const rdns = detail?.info?.rdns || '';
+
+      if (
+        announced &&
+        (announced.isCoinbaseWallet ||
+          name.toLowerCase().includes('coinbase') ||
+          rdns.toLowerCase().includes('coinbase'))
+      ) {
+        setProvider(announced);
+        refreshWallet(announced);
+      }
+    };
+
+    window.addEventListener('eip6963:announceProvider', onAnnounce as EventListener);
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+    return () => {
+      window.removeEventListener('eip6963:announceProvider', onAnnounce as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const p = provider;
+    if (!p) return;
+
+    const onAccountsChanged = (accounts: string[]) => {
+      setAddress(accounts?.[0] || '');
+      setStatus(accounts?.[0] ? 'Account connected' : 'Disconnected');
+    };
+
+    const onChainChanged = (nextChainId: string) => {
+      setChainId(nextChainId);
+      setStatus(nextChainId === BASE_CHAIN_ID ? 'Connected on Base' : 'Wrong network');
+    };
+
+    p.on?.('accountsChanged', onAccountsChanged);
+    p.on?.('chainChanged', onChainChanged);
+
+    return () => {
+      p.removeListener?.('accountsChanged', onAccountsChanged);
+      p.removeListener?.('chainChanged', onChainChanged);
+    };
+  }, [provider]);
+
   const switchToBase = async () => {
-    if (!window.ethereum) {
-      setStatus('Open in Coinbase Wallet');
+    const p = provider || findProvider();
+
+    if (!p) {
+      setStatus('Opening Coinbase...');
       openCoinbaseWallet();
       return;
     }
 
+    setProvider(p);
+
     try {
       setStatus('Switching Base...');
-      await window.ethereum.request({
+      await p.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: BASE_CHAIN_ID }],
       });
-      await refreshWallet();
-      setStatus('');
+
+      await refreshWallet(p);
+      setStatus('Connected on Base');
     } catch (err: any) {
       if (err?.code === 4902) {
         try {
-          await window.ethereum.request({
+          await p.request({
             method: 'wallet_addEthereumChain',
             params: [BASE_PARAMS],
           });
-          await refreshWallet();
-          setStatus('');
+
+          await refreshWallet(p);
+          setStatus('Base added');
         } catch {
-          setStatus('Add Base failed');
+          setStatus('Add Base rejected');
         }
       } else {
         setStatus('Switch rejected');
@@ -102,35 +187,44 @@ const FixedWalletButton: React.FC = () => {
   };
 
   const connectWallet = async () => {
-    setStatus('');
+    let p = provider || findProvider();
 
-    if (!window.ethereum) {
-      setStatus('Open in Coinbase Wallet');
+    if (!p) {
+      setStatus('Opening Coinbase...');
       openCoinbaseWallet();
       return;
     }
 
+    setProvider(p);
+
     try {
-      setStatus('Connecting...');
-      const accounts = await window.ethereum.request({
+      setStatus('Requesting account...');
+
+      const accounts = await p.request({
         method: 'eth_requestAccounts',
       });
 
-      setAddress(accounts?.[0] || '');
-
-      const currentChain = await window.ethereum.request({
+      const currentChain = await p.request({
         method: 'eth_chainId',
       });
 
+      setAddress(accounts?.[0] || '');
       setChainId(currentChain || '');
 
       if (currentChain !== BASE_CHAIN_ID) {
         await switchToBase();
       } else {
-        setStatus('');
+        setStatus('Connected on Base');
       }
-    } catch {
-      setStatus('Connection rejected');
+    } catch (err: any) {
+      const msg = String(err?.message || '').toLowerCase();
+
+      if (msg.includes('user rejected') || err?.code === 4001) {
+        setStatus('Connection rejected');
+      } else {
+        setStatus('Open Coinbase browser');
+        openCoinbaseWallet();
+      }
     }
   };
 
@@ -152,7 +246,7 @@ const FixedWalletButton: React.FC = () => {
 
           <button
             type="button"
-            onClick={refreshWallet}
+            onClick={() => refreshWallet()}
             className="rounded border border-cyan-300/60 bg-blue-600/30 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-cyan-100 shadow-lg backdrop-blur transition hover:bg-blue-500/40"
             title={address}
           >
@@ -171,7 +265,7 @@ const FixedWalletButton: React.FC = () => {
       )}
 
       {status && (
-        <span className="max-w-[180px] rounded bg-black/70 px-2 py-1 text-right font-mono text-[9px] uppercase tracking-wider text-cyan-100">
+        <span className="max-w-[190px] rounded bg-black/75 px-2 py-1 text-right font-mono text-[9px] uppercase tracking-wider text-cyan-100">
           {status}
         </span>
       )}
