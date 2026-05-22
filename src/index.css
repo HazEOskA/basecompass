@@ -1,0 +1,248 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS custom properties ─────────────────────────────────── */
+:root {
+  --base-blue:  #0052ff;
+  --neon-cyan:  #00d4ff;
+  --navy:       #060d1f;
+  --surface:    #0a1628;
+  --glow-blue:  rgba(0, 82, 255, 0.3);
+  --glow-cyan:  rgba(0, 212, 255, 0.2);
+}
+
+/* ─── Base ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--navy);
+  color: #e8edf5;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Noise grain overlay ───────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 220px 220px;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; }
+::-webkit-scrollbar-track  { background: var(--navy); }
+::-webkit-scrollbar-thumb  { background: rgba(0,82,255,0.35); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,0.55); }
+
+/* ─── Selection ─────────────────────────────────────────────── */
+::selection { background: rgba(0,82,255,0.38); color: #fff; }
+
+/* ─── Grid background utility ───────────────────────────────── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(0,82,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,82,255,0.045) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─── Glitch text effect ────────────────────────────────────── */
+.glitch {
+  position: relative;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.glitch::before {
+  color: #00d4ff;
+  animation: glitch1 5s infinite linear;
+}
+.glitch::after {
+  color: #0052ff;
+  animation: glitch2 5s infinite linear;
+  animation-delay: 0.3s;
+}
+
+@keyframes glitch1 {
+  0%,89%,100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+  90%   { clip-path: inset(8%  0 72% 0); transform: translateX(-3px); }
+  92%   { clip-path: inset(55% 0 22% 0); transform: translateX(3px);  }
+  94%   { clip-path: inset(78% 0 8%  0); transform: translateX(-2px); }
+  96%   { clip-path: inset(30% 0 48% 0); transform: translateX(2px);  }
+  98%   { clip-path: inset(0 0 100% 0); transform: translateX(0);     }
+}
+@keyframes glitch2 {
+  0%,91%,100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+  92%   { clip-path: inset(62% 0 18% 0); transform: translateX(4px);  }
+  94%   { clip-path: inset(18% 0 66% 0); transform: translateX(-4px); }
+  96%   { clip-path: inset(82% 0 4%  0); transform: translateX(2px);  }
+  98%   { clip-path: inset(4%  0 82% 0); transform: translateX(-2px); }
+}
+
+/* ─── Neon card ─────────────────────────────────────────────── */
+.neon-card {
+  background: rgba(10, 22, 42, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 82, 255, 0.18);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.neon-card:hover {
+  border-color: rgba(0, 212, 255, 0.45);
+  box-shadow:
+    0 0 30px rgba(0, 82, 255, 0.18),
+    0 0 70px rgba(0, 212, 255, 0.08),
+    inset 0 0 25px rgba(0, 82, 255, 0.04);
+}
+
+/* ─── Glow border top highlight ────────────────────────────── */
+.card-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.5), transparent);
+  border-radius: 0 0 50% 50%;
+}
+
+/* ─── Spray paint shape divider ─────────────────────────────── */
+.spray-line {
+  position: relative;
+  overflow: visible;
+}
+.spray-line::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -2px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, #0052ff 20%, #00d4ff 50%, #0052ff 80%, transparent 100%);
+  filter: blur(1px);
+  opacity: 0.7;
+}
+
+/* ─── Scan line overlay (optional page-level) ───────────────── */
+.scanlines::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+}
+
+/* ─── CTA button style ──────────────────────────────────────── */
+.btn-primary {
+  @apply font-ui font-bold tracking-widest uppercase text-sm px-6 py-3 rounded;
+  background: linear-gradient(135deg, #0052ff 0%, #0099ff 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  transition: opacity 0.2s;
+  opacity: 0;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 25px rgba(0,82,255,0.55), 0 0 60px rgba(0,212,255,0.2);
+  transform: translateY(-1px);
+}
+.btn-primary:hover::after { opacity: 1; }
+
+.btn-ghost {
+  @apply font-ui font-bold tracking-widest uppercase text-sm px-6 py-3 rounded;
+  background: transparent;
+  color: #e8edf5;
+  border: 1px solid rgba(0,82,255,0.35);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s, color 0.2s;
+}
+.btn-ghost:hover {
+  border-color: rgba(0,212,255,0.6);
+  color: #00d4ff;
+  box-shadow: 0 0 18px rgba(0,212,255,0.2);
+  transform: translateY(-1px);
+}
+
+/* ─── Typography helpers ────────────────────────────────────── */
+.font-display { font-family: 'Bebas Neue', cursive; }
+.font-ui      { font-family: 'Rajdhani', sans-serif; }
+.font-mono    { font-family: 'Space Mono', monospace; }
+
+/* ─── Tag / sticker badge ────────────────────────────────────── */
+.sticker {
+  @apply font-mono text-xs px-2 py-0.5 rounded-sm uppercase tracking-wider;
+  border: 1px solid currentColor;
+}
+
+/* ─── Animated compass ring ─────────────────────────────────── */
+.compass-ring {
+  animation: radarSpin 5s linear infinite;
+  transform-origin: center;
+}
+.compass-ring-reverse {
+  animation: radarSpin 8s linear infinite reverse;
+  transform-origin: center;
+}
+.compass-pulse {
+  animation: radarPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes radarSpin  {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+@keyframes radarPulse {
+  0%,100% { opacity: 0.6; }
+  50%     { opacity: 0.2; }
+}
+
+/* ─── Route line draw ────────────────────────────────────────── */
+.route-draw {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: drawLine 2s ease forwards;
+}
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ─── Score bar ─────────────────────────────────────────────── */
+.score-bar {
+  background: rgba(0,82,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+  background: linear-gradient(90deg, #0052ff, #00d4ff);
+}
