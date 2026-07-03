@@ -4,6 +4,7 @@ import { ArrowRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import MetroRoadmap from '../components/MetroRoadmap';
 import SprayDivider from '../components/SprayDivider';
+import OnchainCheckIn from '../components/OnchainCheckIn';
 
 const RoadmapPage: React.FC = () => {
   return (
@@ -64,6 +65,18 @@ const RoadmapPage: React.FC = () => {
       <div className="py-10">
         <SprayDivider label="route stations" className="max-w-4xl mx-auto px-4 mb-6" />
         <MetroRoadmap />
+      </div>
+
+      {/* Onchain proof */}
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <SprayDivider label="prove it onchain" className="mb-6" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <OnchainCheckIn route="beginner-roadmap" />
+        </motion.div>
       </div>
 
       {/* CTA row */}
