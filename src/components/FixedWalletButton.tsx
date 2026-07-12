@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { activeChain } from '../web3/wagmi';
 
 declare global {
   interface Window {
@@ -6,18 +7,19 @@ declare global {
   }
 }
 
-const BASE_CHAIN_ID = '0x2105';
+// Derived from the env-configured chain (Base mainnet or Base Sepolia).
+const BASE_CHAIN_ID = `0x${activeChain.id.toString(16)}`;
 
 const BASE_PARAMS = {
   chainId: BASE_CHAIN_ID,
-  chainName: 'Base',
-  nativeCurrency: {
-    name: 'Ether',
-    symbol: 'ETH',
-    decimals: 18,
-  },
-  rpcUrls: ['https://mainnet.base.org'],
-  blockExplorerUrls: ['https://basescan.org'],
+  chainName: activeChain.name,
+  nativeCurrency: activeChain.nativeCurrency,
+  rpcUrls: [
+    (import.meta.env.VITE_BASE_RPC_URL as string) || activeChain.rpcUrls.default.http[0],
+  ],
+  blockExplorerUrls: activeChain.blockExplorers?.default.url
+    ? [activeChain.blockExplorers.default.url]
+    : [],
 };
 
 type ProviderDetail = {

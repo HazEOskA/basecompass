@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
-import { base } from '../web3/wagmi';
+import { activeChain } from '../web3/wagmi';
 
 const shortAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
 
@@ -54,7 +54,7 @@ const WalletConnectButton: React.FC = () => {
   };
 
   if (isConnected && address) {
-    const wrongChain = chainId !== base.id;
+    const wrongChain = chainId !== activeChain.id;
 
     return (
       <div className="flex flex-col items-end gap-1">
@@ -62,7 +62,7 @@ const WalletConnectButton: React.FC = () => {
           {wrongChain && (
             <button
               type="button"
-              onClick={() => switchChain({ chainId: base.id })}
+              onClick={() => switchChain({ chainId: activeChain.id })}
               disabled={isSwitching}
               className={buttonClass}
             >
@@ -71,7 +71,7 @@ const WalletConnectButton: React.FC = () => {
           )}
 
           <button type="button" onClick={() => disconnect()} className={buttonClass} title={address}>
-            {wrongChain ? shortAddress(address) : `Base ${shortAddress(address)}`}
+            {wrongChain ? shortAddress(address) : `${activeChain.name} ${shortAddress(address)}`}
           </button>
         </div>
       </div>
