@@ -1,17 +1,17 @@
 import { createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { coinbaseWallet, injected } from 'wagmi/connectors';
+import { baseAccount, injected } from 'wagmi/connectors';
 
 export const wagmiConfig = createConfig({
   chains: [base],
   connectors: [
     injected(),
-    coinbaseWallet({
+    baseAccount({
       appName: 'BaseCompass',
     }),
   ],
   transports: {
-    [base.id]: http(),
+    [base.id]: http('https://mainnet.base.org'),
   },
 });
 
