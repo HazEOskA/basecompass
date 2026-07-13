@@ -47,6 +47,7 @@ BaseCompass is a no-backend, fully static web app that helps beginners:
 - **Framer Motion** — entrance animations, hover effects, terminal reveals
 - **lucide-react** — icon system
 - **React Router v6** — client-side routing
+- **wagmi + viem + Base Account** — Base mainnet wallet connection
 - **No backend** — all data in local TypeScript files
 - **No env variables required**
 
@@ -91,6 +92,20 @@ npx vercel
 ```
 
 The included `vercel.json` handles SPA routing rewrites automatically.
+
+---
+
+## ✦ Publish to Base App
+
+BaseCompass follows the current Base standard web app model. A Farcaster manifest is not required.
+
+1. Deploy the production build and confirm the public HTTPS URL.
+2. Test connect, disconnect, and network switching in a mobile wallet browser.
+3. Create the app project in [Base.dev](https://www.base.dev/).
+4. Add the production URL, icon, tagline, description, screenshots, category, and builder code.
+5. Complete Base.dev ownership verification and submit the app for review.
+
+The first release does not deploy a smart contract. The planned onchain attestation layer remains a separate milestone.
 
 ---
 
