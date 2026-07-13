@@ -32,7 +32,7 @@ const ROUTES: Route[] = [
     appIds: ['base-camp', 'odyssey', 'useweb3'],
     path: 'BEGINNER CIRCUIT',
     safetyNote: 'Always practice on testnet before using real funds.',
-    nextAction: 'Start Base Camp Module 1 — free and official.',
+    nextAction: 'Open the official Base learning resources and choose your first path.',
   },
   {
     id: 'defi',
@@ -97,7 +97,7 @@ const ROUTES: Route[] = [
     appIds: ['odyssey', 'base-grants', 'base-camp'],
     path: 'REWARDS TERMINAL',
     safetyNote: 'Real Base grants never charge upfront fees. Verify all grant programs.',
-    nextAction: 'Complete your first Odyssey mission to earn a Base attestation.',
+    nextAction: 'Review the current Base funding paths and required proof of shipping.',
   },
 ];
 

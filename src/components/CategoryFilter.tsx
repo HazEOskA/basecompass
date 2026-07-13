@@ -31,10 +31,11 @@ const Pill: React.FC<{
   children: React.ReactNode;
 }> = ({ active, onClick, children }) => (
   <button
+    type="button"
     onClick={onClick}
     className={`
       font-mono text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-sm border
-      transition-all duration-150 whitespace-nowrap
+      min-h-10 transition-all duration-150 whitespace-nowrap touch-manipulation
       ${active
         ? 'bg-base-blue/25 border-base-blue/60 text-base-blue-lt'
         : 'bg-surface-2 border-base-blue/15 text-txt-muted hover:border-base-blue/35 hover:text-txt-secondary'

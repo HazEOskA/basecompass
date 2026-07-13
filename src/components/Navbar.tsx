@@ -45,9 +45,9 @@ const Navbar: React.FC = () => {
             : 'none',
         }}
       >
-        <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-3 sm:px-5 h-14 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
             <div className="relative">
               <Compass
                 size={20}
@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
                 style={{ filter: 'drop-shadow(0 0 6px rgba(0,82,255,0.5))' }}
               />
             </div>
-            <span className="font-display text-xl tracking-wider">
+            <span className="font-display text-lg sm:text-xl tracking-wider">
               <span className="text-base-blue">BASE</span>
               <span className="text-txt-primary">COMPASS</span>
             </span>
@@ -99,13 +99,19 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileOpen(v => !v)}
-            className="md:hidden text-txt-secondary hover:text-txt-primary transition-colors duration-150 p-1"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Mobile wallet + menu */}
+          <div className="flex md:hidden items-center gap-1.5">
+            <WalletConnectButton compact />
+            <button
+              type="button"
+              onClick={() => setMobileOpen(v => !v)}
+              aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={mobileOpen}
+              className="min-w-10 min-h-10 inline-flex items-center justify-center text-txt-secondary hover:text-txt-primary transition-colors duration-150 touch-manipulation"
+            >
+              {mobileOpen ? <X size={21} /> : <Menu size={21} />}
+            </button>
+          </div>
         </div>
       </header>
 
