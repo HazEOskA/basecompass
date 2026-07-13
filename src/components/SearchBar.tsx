@@ -42,6 +42,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       />
       {value && (
         <button
+          type="button"
           onClick={() => onChange('')}
           className="absolute right-3.5 top-1/2 -translate-y-1/2 text-txt-muted hover:text-txt-primary transition-colors duration-150"
         >

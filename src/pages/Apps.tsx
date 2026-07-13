@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Database } from 'lucide-react';
+import { ChevronDown, Database, SlidersHorizontal } from 'lucide-react';
 import { apps } from '../data/apps';
 import { filterApps, sortApps, FilterState } from '../utils/filters';
 import SearchBar from '../components/SearchBar';
@@ -19,6 +19,7 @@ const DEFAULT_FILTERS: FilterState = {
 
 const Apps: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(() => ({
     ...DEFAULT_FILTERS,
     category: searchParams.get('category') ?? '',
@@ -42,7 +43,7 @@ const Apps: React.FC = () => {
     <div className="min-h-screen">
       {/* Page header */}
       <div
-        className="relative py-14 px-4 border-b"
+        className="relative py-10 sm:py-14 px-4 border-b overflow-hidden"
         style={{
           borderColor: 'rgba(0,82,255,0.15)',
           background:
@@ -58,7 +59,7 @@ const Apps: React.FC = () => {
           <p className="font-mono text-[11px] text-txt-muted uppercase tracking-[0.3em] mb-2">
             // street intel directory
           </p>
-          <h1 className="font-display text-6xl md:text-7xl text-txt-primary mb-3">
+          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl text-txt-primary mb-3">
             DAPP DIRECTORY
           </h1>
           <p className="font-ui text-txt-secondary max-w-xl">
@@ -68,7 +69,7 @@ const Apps: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-10">
         {/* Search */}
         <div className="mb-6">
           <SearchBar
@@ -78,8 +79,24 @@ const Apps: React.FC = () => {
         </div>
 
         {/* Filters */}
+        <button
+          type="button"
+          onClick={() => setMobileFiltersOpen(open => !open)}
+          aria-expanded={mobileFiltersOpen}
+          className="md:hidden w-full min-h-11 mb-3 px-4 rounded-lg border border-base-blue/25 bg-surface-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider text-txt-secondary touch-manipulation"
+        >
+          <span className="flex items-center gap-2">
+            <SlidersHorizontal size={14} className="text-base-blue" />
+            Filters · {filtered.length} results
+          </span>
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${mobileFiltersOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+
         <div
-          className="neon-card rounded-xl p-5 mb-8"
+          className={`${mobileFiltersOpen ? 'block' : 'hidden'} md:block neon-card rounded-xl p-4 sm:p-5 mb-6 sm:mb-8`}
           style={{ borderColor: 'rgba(0,82,255,0.2)' }}
         >
           <CategoryFilter
@@ -97,7 +114,7 @@ const Apps: React.FC = () => {
 
         {/* Results grid */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filtered.map((app, i) => (
               <StreetIntelCard key={app.id} app={app} index={i} />
             ))}
@@ -119,6 +136,7 @@ const Apps: React.FC = () => {
               No dApps match your current filters.
             </p>
             <button
+              type="button"
               onClick={() => setFilters(DEFAULT_FILTERS)}
               className="btn-ghost text-sm"
             >

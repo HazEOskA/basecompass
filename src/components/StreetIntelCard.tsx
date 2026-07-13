@@ -119,7 +119,7 @@ const StreetIntelCard: React.FC<StreetIntelCardProps> = ({ app, index = 0 }) => 
           href={app.officialUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-4 py-2.5 rounded-md font-mono text-xs uppercase tracking-wider transition-all duration-200 group/btn"
+          className="flex items-center justify-between w-full min-h-11 px-4 py-2.5 rounded-md font-mono text-xs uppercase tracking-wider transition-all duration-200 group/btn touch-manipulation"
           style={{
             background: 'rgba(0,82,255,0.12)',
             border: '1px solid rgba(0,82,255,0.3)',
