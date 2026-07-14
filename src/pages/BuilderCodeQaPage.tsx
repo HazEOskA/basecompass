@@ -9,14 +9,14 @@ import {
 import {
   useAccount,
   useChainId,
-  useSendTransaction,
+  useSendCallsSync,
   useSwitchChain,
-  useWaitForTransactionReceipt,
 } from 'wagmi';
 import WalletConnectButton from '../components/WalletConnectButton';
 import {
   base,
   BASECOMPASS_BUILDER_CODE,
+  BASECOMPASS_DATA_SUFFIX,
 } from '../web3/wagmi';
 
 const ATTRIBUTION_TEST_ADDRESS =
@@ -30,28 +30,38 @@ const BuilderCodeQaPage: React.FC = () => {
   const chainId = useChainId();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const {
-    sendTransaction,
-    data: hash,
-    isPending: isSigning,
+    sendCallsSync,
+    data,
+    isPending,
+    isSuccess,
     error,
     reset,
-  } = useSendTransaction();
-  const {
-    isLoading: isConfirming,
-    isSuccess,
-  } = useWaitForTransactionReceipt({ hash });
+  } = useSendCallsSync();
 
   const wrongChain = isConnected && chainId !== base.id;
-  const busy = isSigning || isConfirming;
+  const transactionHash = data?.receipts?.[0]?.transactionHash;
   const errorMessage = error
     ? (error as { shortMessage?: string }).shortMessage || error.message.split('\n')[0]
     : '';
 
   const runAttributionTest = () => {
     reset();
-    sendTransaction({
-      to: ATTRIBUTION_TEST_ADDRESS,
-      value: 0n,
+    sendCallsSync({
+      chainId: base.id,
+      calls: [
+        {
+          to: ATTRIBUTION_TEST_ADDRESS,
+          value: 0n,
+          data: '0x',
+        },
+      ],
+      capabilities: {
+        dataSuffix: {
+          value: BASECOMPASS_DATA_SUFFIX,
+          optional: false,
+        },
+      },
+      timeout: 120_000,
     });
   };
 
@@ -69,9 +79,8 @@ const BuilderCodeQaPage: React.FC = () => {
             BUILDER CODE TEST
           </h1>
           <p className="max-w-2xl font-ui text-txt-secondary">
-            This hidden page verifies that BaseCompass transactions include the
-            Base Builder Code attribution suffix before we ship a production
-            onchain feature.
+            This hidden page verifies Builder Code attribution through the Base
+            Account dataSuffix capability before we ship a production onchain feature.
           </p>
         </div>
 
@@ -90,9 +99,11 @@ const BuilderCodeQaPage: React.FC = () => {
             </div>
             <div className="rounded-md border border-base-blue/20 bg-surface-2 p-4">
               <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-txt-muted">
-                Network
+                Transport
               </p>
-              <p className="font-mono text-sm text-txt-primary">Base mainnet · 8453</p>
+              <p className="font-mono text-sm text-txt-primary">
+                wallet_sendCalls · Base 8453
+              </p>
             </div>
           </div>
 
@@ -107,6 +118,8 @@ const BuilderCodeQaPage: React.FC = () => {
             <p className="font-ui text-sm leading-snug text-street-amber/90">
               The test sends exactly 0 ETH to a burn address. No funds are
               transferred, but the wallet still charges a small Base network fee.
+              Attribution support is required; the request fails instead of silently
+              dropping the Builder Code.
             </p>
           </div>
 
@@ -136,15 +149,13 @@ const BuilderCodeQaPage: React.FC = () => {
               <button
                 type="button"
                 onClick={runAttributionTest}
-                disabled={busy}
+                disabled={isPending}
                 className="btn-primary inline-flex items-center gap-2"
               >
-                {busy && <Loader2 size={14} className="animate-spin" />}
-                {isSigning
-                  ? 'Confirm in wallet...'
-                  : isConfirming
-                    ? 'Waiting for confirmation...'
-                    : 'Send 0 ETH test transaction'}
+                {isPending && <Loader2 size={14} className="animate-spin" />}
+                {isPending
+                  ? 'Confirming attributed call...'
+                  : 'Send attributed 0 ETH call'}
               </button>
               <p className="font-mono text-[10px] uppercase tracking-wider text-txt-muted">
                 Connected: {address}
@@ -152,18 +163,18 @@ const BuilderCodeQaPage: React.FC = () => {
             </div>
           )}
 
-          {hash && (
+          {transactionHash && (
             <a
-              href={`https://basescan.org/tx/${hash}`}
+              href={`https://basescan.org/tx/${transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-neon-cyan transition-opacity hover:opacity-70"
             >
-              Transaction {shortHash(hash)} <ExternalLink size={11} />
+              Transaction {shortHash(transactionHash)} <ExternalLink size={11} />
             </a>
           )}
 
-          {isSuccess && hash && (
+          {isSuccess && (
             <div
               className="mt-5 flex items-start gap-2.5 rounded-md border px-4 py-3"
               style={{
@@ -173,8 +184,8 @@ const BuilderCodeQaPage: React.FC = () => {
             >
               <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-street-green" />
               <p className="font-ui text-sm text-street-green/90">
-                Transaction confirmed. Next, verify the hash in Base.dev and the
-                Builder Code checker.
+                Attributed call confirmed. Copy the transaction hash for calldata
+                verification before merging this fix.
               </p>
             </div>
           )}
